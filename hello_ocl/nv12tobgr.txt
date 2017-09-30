@@ -1,0 +1,49 @@
+/**
+* brief@ nv12_to_bgr24, color space convert, fix-point calculate.
+* param@ pNV12: src NV12 image
+* param@ width: NV12 width
+* param@ height: NV12 height
+* param@ pBGR24: Out BGR24 image, size = width * height * 3
+*/
+void nv12_to_bgr24(const uint8_t *pNV12, int width, int height, uint8_t *pBGR24)
+{
+       int w, h, tmp1, tmp2, tmp3;
+       const uint8_t* pY, *pUV;
+       uint8_t* pTmpBGRBuf;
+       int halfWidth = width >> 1;
+       
+       pTmpBGRBuf = pBGR24;
+       pY = pNV12;
+       pUV = pNV12 + width * height;
+       for(h = 0; h < height; h++) {
+             for(w = 0; w < width; w++) {
+                    uint8_t curY = pY[0];
+                    uint8_t curU = pUV[(h >> 1) * width + (w&0XFFFE)];
+                    uint8_t curV = pUV[(h >> 1) * width + (w&0XFFFE) + 1];
+
+                    tmp1 = curY - 16;
+                    tmp2 = curU - 128;
+                    tmp3 = curV - 128;
+
+                    pTmpBGRBuf[0] = (uint8_t)(RANGE_UCHAR(( 298 * tmp1 + 516 * tmp2 + 128) >> 8));
+                    pTmpBGRBuf[1] = (uint8_t)(RANGE_UCHAR(( 298 * tmp1 - 100 * tmp2 - 208 * tmp3 + 128) >> 8));
+                    pTmpBGRBuf[2] = (uint8_t)(RANGE_UCHAR(( 298 * tmp1  + 409 * tmp3 + 128) >> 8));
+
+                    pY++;
+                    pTmpBGRBuf += 3;
+             }
+       }
+
+       /* If height is not even number, need to process last line data */
+       if (height % 2 == 1) {
+             h = height - 1;
+             pY = (pNV12 + h * width);
+             pTmpBGRBuf = pBGR24 + h * width * 3;
+             for (w = 0; w < width; w++) {
+                    pTmpBGRBuf[0] = pTmpBGRBuf[1] = pTmpBGRBuf[2] = pY[0];
+                    pTmpBGRBuf += 3;
+                    pY++;
+             }
+             height--;
+       }
+}
