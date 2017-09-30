@@ -3,6 +3,8 @@ project (gst)
 
 # some files need directly copied into the build
 configure_file(${PROJECT_SOURCE_DIR}/setenv.sh ${PROJECT_BINARY_DIR}/setenv.sh COPYONLY)
+configure_file(${PROJECT_SOURCE_DIR}/test_adv.ogg ${PROJECT_BINARY_DIR}/test_adv.ogg COPYONLY)
+
 
 # find 3rd party packages and add them into project(for all target)
 find_package(PkgConfig)
